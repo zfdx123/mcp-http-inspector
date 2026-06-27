@@ -1,0 +1,18 @@
+[project]
+name = "mcp-http-inspector"
+version = "1.0.0"
+description = "MCP server for HTTP request inspection with web panel and screenshot — Streamable HTTP transport"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.0.0",
+    "httpx>=0.28.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "playwright>=1.52.0",
+    "aiosqlite>=0.20.0",
+    "sse-starlette>=2.0.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+mcp-http-inspector = "server:main"

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Runtime data
+history.db
+screenshots/
+
+# Browsers (large binaries)
+browsers/chrome-linux64/
+browsers/chrome-mac-arm64/
+browsers/chrome-win64/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log

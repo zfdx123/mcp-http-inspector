@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTTP Inspector</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #1a1a2e; color: #d4d4d4; height: 100vh; display: flex; flex-direction: column; }
+  header { background: #16213e; padding: 8px 16px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #0f3460; }
+  header h1 { font-size: 16px; color: #e94560; }
+  nav { display: flex; gap: 4px; }
+  nav button { background: transparent; border: 1px solid #0f3460; color: #d4d4d4; padding: 6px 16px; cursor: pointer; border-radius: 4px; font-size: 13px; }
+  nav button.active { background: #0f3460; border-color: #e94560; color: #fff; }
+  nav button:hover { border-color: #e94560; }
+  main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .tab-content { flex: 1; overflow: auto; display: none; flex-direction: column; }
+  .tab-content.active { display: flex; }
+
+  /* History table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #16213e; padding: 6px 12px; text-align: left; border-bottom: 2px solid #0f3460; position: sticky; top: 0; z-index: 1; }
+  td { padding: 5px 12px; border-bottom: 1px solid #0f3460; }
+  tr:hover td { background: #0f3460; cursor: pointer; }
+  .method-get { color: #61afef; }
+  .method-post { color: #98c379; }
+  .method-put { color: #e5c07b; }
+  .method-delete { color: #e06c75; }
+  .method-patch { color: #c678dd; }
+  .status-2xx { color: #98c379; }
+  .status-3xx { color: #e5c07b; }
+  .status-4xx { color: #e06c75; }
+  .status-5xx { color: #be5046; }
+  .status-error { color: #ff4444; }
+
+  /* Detail pane */
+  .detail-container { display: flex; flex-direction: column; gap: 10px; padding: 12px; flex: 1; overflow: auto; }
+  .http-block { background: #16213e; border: 1px solid #0f3460; border-radius: 6px; overflow: hidden; }
+  .http-block h3 { background: #0f3460; padding: 6px 12px; font-size: 13px; color: #e94560; }
+  .http-block pre { padding: 12px; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow: auto; }
+  .meta-row { display: flex; gap: 16px; padding: 4px 12px; font-size: 12px; color: #888; }
+  .back-btn { align-self: flex-start; background: #0f3460; border: 1px solid #e94560; color: #fff; padding: 4px 12px; cursor: pointer; border-radius: 4px; margin: 8px; }
+
+  /* Sender */
+  .sender-container { display: flex; flex-direction: column; gap: 10px; padding: 12px; flex: 1; overflow: auto; }
+  .sender-row { display: flex; gap: 8px; align-items: center; }
+  .sender-row label { font-size: 13px; min-width: 50px; }
+  .sender-row input, .sender-row select, .sender-row textarea { flex: 1; background: #16213e; border: 1px solid #0f3460; color: #d4d4d4; padding: 6px 10px; border-radius: 4px; font-family: inherit; font-size: 13px; }
+  .sender-row textarea { resize: vertical; min-height: 80px; font-family: 'Consolas', monospace; }
+  #send-headers { min-height: 60px; }
+  #send-body { min-height: 120px; }
+  #send-btn { background: #e94560; color: #fff; border: none; padding: 8px 24px; cursor: pointer; border-radius: 4px; font-size: 14px; align-self: flex-start; }
+  #send-btn:hover { background: #ff6b81; }
+  .response-preview { background: #16213e; border: 1px solid #0f3460; border-radius: 6px; padding: 12px; margin-top: 8px; overflow: auto; max-height: 400px; }
+  .response-preview pre { font-family: 'Consolas', monospace; font-size: 12px; white-space: pre-wrap; }
+
+  .empty-state { display: flex; align-items: center; justify-content: center; flex: 1; color: #555; font-size: 18px; }
+
+  /* Loading indicator */
+  .loading { color: #888; padding: 12px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.svg" alt="logo" style="height:28px;width:28px;">
+  <h1>HTTP Inspector</h1>
+  <nav>
+    <button data-tab="history" class="active">📋 History</button>
+    <button data-tab="detail">📄 Detail</button>
+    <button data-tab="sender">✈️ Sender</button>
+  </nav>
+  <button id="clear-btn" onclick="clearAll()" style="background:transparent;border:1px solid #e06c75;color:#e06c75;padding:4px 12px;cursor:pointer;border-radius:4px;font-size:12px;">🗑 Clear All</button>
+  <span id="conn-status" style="font-size:11px; color:#888; margin-left:auto;"></span>
+</header>
+
+<main>
+  <!-- HISTORY TAB -->
+  <div id="tab-history" class="tab-content active">
+    <table>
+      <thead><tr><th>#</th><th>Time</th><th>Method</th><th>URL</th><th>Status</th><th>Duration</th><th>Size</th></tr></thead>
+      <tbody id="history-tbody"></tbody>
+    </table>
+    <div id="history-empty" class="empty-state">暂无请求记录，发送第一个请求吧 🚀</div>
+  </div>
+
+  <!-- DETAIL TAB -->
+  <div id="tab-detail" class="tab-content">
+    <button class="back-btn" onclick="switchTab('history')">← Back to History</button>
+    <div id="detail-content" class="detail-container"></div>
+  </div>
+
+  <!-- SENDER TAB -->
+  <div id="tab-sender" class="tab-content">
+    <div class="sender-container">
+      <div class="sender-row">
+        <label>Method</label>
+        <select id="send-method">
+          <option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option><option>PATCH</option><option>HEAD</option><option>OPTIONS</option>
+        </select>
+      </div>
+      <div class="sender-row">
+        <label>URL</label>
+        <input id="send-url" type="text" placeholder="https://example.com/api" />
+      </div>
+      <div class="sender-row">
+        <label>Headers</label>
+        <textarea id="send-headers" placeholder='{"Content-Type": "application/json"}'></textarea>
+      </div>
+      <div class="sender-row">
+        <label>Body</label>
+        <textarea id="send-body" placeholder='{"key": "value"}'></textarea>
+      </div>
+      <button id="send-btn" onclick="sendFromPanel()">Send Request</button>
+      <div id="sender-response" class="response-preview" style="display:none;"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ===== Tab Switching =====
+let currentTab = 'history';
+let currentDetailId = null;
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+  if (tab === 'detail' && currentDetailId) {
+    loadDetail(currentDetailId);
+  }
+}
+
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// Check URL params for initial tab
+const urlParams = new URLSearchParams(window.location.search);
+const initTab = urlParams.get('tab');
+if (initTab) switchTab(initTab);
+const initId = urlParams.get('id');
+if (initId) { currentDetailId = parseInt(initId); if (initTab === 'detail') loadDetail(currentDetailId); }
+const screenshotMode = urlParams.get('screenshot') === '1';
+if (screenshotMode) {
+  document.querySelector('header').style.display = 'none';
+  document.querySelectorAll('.back-btn').forEach(b => b.style.display = 'none');
+  document.querySelector('main').style.padding = '0';
+}
+
+// ===== SSE =====
+const statusEl = document.getElementById('conn-status');
+const evtSource = new EventSource('/api/events');
+
+evtSource.onopen = () => {
+  statusEl.textContent = '● Live';
+  statusEl.style.color = '#98c379';
+  loadHistory();
+};
+
+evtSource.onmessage = (event) => {
+  try {
+    const data = JSON.parse(event.data);
+    if (data.type === 'new_request') {
+      prependHistoryRow(data);
+    }
+  } catch(e) {}
+};
+
+evtSource.onerror = () => {
+  statusEl.textContent = '● Reconnecting...';
+  statusEl.style.color = '#e06c75';
+};
+
+// ===== History =====
+let allRows = [];
+
+async function loadHistory() {
+  try {
+    const resp = await fetch('/api/history?limit=100');
+    const rows = await resp.json();
+    allRows = rows;
+    renderHistoryTable();
+  } catch(e) {}
+}
+
+function renderHistoryTable() {
+  const tbody = document.getElementById('history-tbody');
+  const empty = document.getElementById('history-empty');
+  if (allRows.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = allRows.map(r => historyRowHTML(r)).join('');
+}
+
+function historyRowHTML(r) {
+  const methodCls = 'method-' + (r.method || '').toLowerCase();
+  let statusCls = 'status-error';
+  if (r.status_code) {
+    const s = String(r.status_code)[0];
+    if (s === '2') statusCls = 'status-2xx';
+    else if (s === '3') statusCls = 'status-3xx';
+    else if (s === '4') statusCls = 'status-4xx';
+    else if (s === '5') statusCls = 'status-5xx';
+  }
+  const time = r.timestamp ? r.timestamp.substring(11, 19) : '';
+  const status = r.status_code || (r.error ? 'ERR' : '—');
+  const size = r.response_size ? formatSize(r.response_size) : '';
+  const dur = r.duration_ms ? r.duration_ms + 'ms' : '';
+  return `<tr onclick="showDetail(${r.id})">
+    <td>${r.id}</td><td>${time}</td>
+    <td class="${methodCls}">${r.method}</td>
+    <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(r.url)}</td>
+    <td class="${statusCls}">${status}</td>
+    <td>${dur}</td><td>${size}</td>
+  </tr>`;
+}
+
+function prependHistoryRow(data) {
+  allRows.unshift({ id: data.id, method: data.method, url: data.url, status_code: data.status_code, duration_ms: data.duration_ms, response_size: data.response_size, error: data.error, timestamp: new Date().toISOString() });
+  renderHistoryTable();
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + 'B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + 'KB';
+  return (bytes / 1048576).toFixed(1) + 'MB';
+}
+
+function esc(s) { return s ? s.replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+
+// ===== Detail =====
+async function showDetail(id) {
+  currentDetailId = id;
+  switchTab('detail');
+}
+
+async function loadDetail(id) {
+  try {
+    const resp = await fetch('/api/history/' + id);
+    const data = await resp.json();
+    if (data.error) {
+      document.getElementById('detail-content').innerHTML = '<p>' + data.error + '</p>';
+      return;
+    }
+    document.getElementById('detail-content').innerHTML = `
+      <div class="http-block">
+        <div class="meta-row">
+          <span>${data.method} ${esc(data.url)}</span>
+          <span>Status: ${data.status_code || data.error || '—'}</span>
+          <span>Duration: ${data.duration_ms ? data.duration_ms + 'ms' : ''}</span>
+          <span>Size: ${data.response_size ? formatSize(data.response_size) : ''}</span>
+        </div>
+      </div>
+      <div class="http-block">
+        <h3>📤 Request</h3>
+        <pre>${esc(data.raw_request)}</pre>
+      </div>
+      <div class="http-block">
+        <h3>📥 Response</h3>
+        <pre>${esc(data.raw_response || data.error || '')}</pre>
+      </div>`;
+  } catch(e) {
+    document.getElementById('detail-content').innerHTML = '<p>Failed to load</p>';
+  }
+}
+
+// ===== Sender =====
+async function sendFromPanel() {
+  const method = document.getElementById('send-method').value;
+  const url = document.getElementById('send-url').value;
+  const headers = document.getElementById('send-headers').value;
+  const body = document.getElementById('send-body').value;
+  const respDiv = document.getElementById('sender-response');
+
+  if (!url) { alert('请输入 URL'); return; }
+
+  respDiv.style.display = 'block';
+  respDiv.innerHTML = '<span class="loading">Sending...</span>';
+
+  try {
+    const resp = await fetch('/api/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method, url, headers, body })
+    });
+    const data = await resp.json();
+    respDiv.innerHTML = `<pre>${esc(JSON.stringify(data, null, 2))}</pre>`;
+  } catch(e) {
+    respDiv.innerHTML = `<pre>Error: ${esc(String(e))}</pre>`;
+  }
+}
+
+// Initial load
+loadHistory();
+
+// ===== Clear All =====
+async function clearAll() {
+  if (!confirm('确定清空所有请求历史和截图？')) return;
+  try {
+    await fetch('/api/clear', { method: 'POST' });
+    allRows = [];
+    renderHistoryTable();
+    document.getElementById('detail-content').innerHTML = '';
+  } catch(e) {}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#7b2ff7"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded rect -->
+  <rect x="16" y="16" width="480" height="480" rx="80" ry="80" fill="url(#bg)" stroke="url(#accent)" stroke-width="4"/>
+
+  <!-- Magnifying glass body (circle) -->
+  <circle cx="210" cy="230" r="110" fill="none" stroke="url(#accent)" stroke-width="18" stroke-linecap="round"/>
+  <!-- Glass inner highlight -->
+  <circle cx="210" cy="230" r="100" fill="url(#glass)"/>
+
+  <!-- Magnifying glass handle -->
+  <line x1="290" y1="310" x2="390" y2="410" stroke="url(#accent)" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- HTTP arrows in the lens area -->
+  <!-- Arrow 1: request (right-down) -->
+  <path d="M160 190 L240 240" stroke="#00d4ff" stroke-width="8" stroke-linecap="round"/>
+  <polygon points="240,240 225,230 232,248" fill="#00d4ff"/>
+
+  <!-- Arrow 2: response (left-up) -->
+  <path d="M250 250 L170 210" stroke="#7b2ff7" stroke-width="8" stroke-linecap="round"/>
+  <polygon points="170,210 185,220 178,202" fill="#7b2ff7"/>
+
+  <!-- Small HTTP method label -->
+  <text x="210" y="175" text-anchor="middle" font-family="'Courier New', monospace" font-size="18" font-weight="bold" fill="#00d4ff" letter-spacing="4">GET</text>
+
+  <!-- Small status code -->
+  <text x="205" y="285" text-anchor="middle" font-family="'Courier New', monospace" font-size="16" font-weight="bold" fill="#7b2ff7">200</text>
+
+  <!-- Brand text -->
+  <text x="256" y="460" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="32" font-weight="700" fill="#00d4ff" letter-spacing="2">HTTP INSPECTOR</text>
+  <text x="256" y="486" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#7b2ff7" letter-spacing="6">MCP SERVER</text>
+</svg>
