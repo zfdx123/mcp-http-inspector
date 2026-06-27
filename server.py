@@ -103,7 +103,7 @@ async def send_http_request(
         start = time.perf_counter()
         async with httpx.AsyncClient(**client_kwargs) as client:
             resp = await client.request(
-                method=method.upper(), url=url, headers=parsed_headers, content=body_str_str
+                method=method.upper(), url=url, headers=parsed_headers, content=body_str
             )
         elapsed = (time.perf_counter() - start) * 1000
 

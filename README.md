@@ -1,7 +1,8 @@
 # HTTP Inspector MCP Server
 
 基于 Streamable HTTP 的 MCP 服务器，集成 Web 面板与截图功能。  
-单进程、单端口 — 一站式 HTTP 流量检测工具箱。
+单进程、单端口 — 一站式 HTTP 流量检测工具箱。  
+解决AI自动化渗透测试后续需要人工复现截图的问题。
 
 ## 功能
 
