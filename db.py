@@ -1,4 +1,8 @@
-"""SQLite data layer for HTTP request history."""
+"""SQLite data layer for HTTP request history.
+
+Copyright (C) 2026  HTTP Inspector Contributors
+License: GPL-3.0-or-later
+"""
 
 import aiosqlite
 import json

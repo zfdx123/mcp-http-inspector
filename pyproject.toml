@@ -2,6 +2,7 @@
 name = "mcp-http-inspector"
 version = "1.0.0"
 description = "MCP server for HTTP request inspection with web panel and screenshot — Streamable HTTP transport"
+license = {text = "GPL-3.0-or-later"}
 requires-python = ">=3.11"
 dependencies = [
     "mcp>=1.0.0",

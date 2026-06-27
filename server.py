@@ -1,5 +1,8 @@
 """MCP HTTP Inspector — Streamable HTTP MCP server with web panel and screenshot.
 
+Copyright (C) 2026  HTTP Inspector Contributors
+License: GPL-3.0-or-later <https://www.gnu.org/licenses/gpl-3.0>
+
 Single process, single port (default 9876):
   /mcp       — Streamable HTTP MCP endpoint
   /          — Web panel SPA
