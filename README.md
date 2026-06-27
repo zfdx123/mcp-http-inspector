@@ -1,30 +1,33 @@
 # HTTP Inspector MCP Server
 
-Streamable HTTP MCP server with web panel and screenshot capability.  
-Single process, single port — all-in-one HTTP traffic inspection toolkit.
+基于 Streamable HTTP 的 MCP 服务器，集成 Web 面板与截图功能。  
+单进程、单端口 — 一站式 HTTP 流量检测工具箱。
 
-## Features
+## 功能
 
-- **Send arbitrary HTTP requests** — any method, custom headers/body, proxy, timeout (like Burp Repeater)
-- **Web Panel** — real-time traffic history table with SSE, raw HTTP detail view, manual sender tab
-- **Screenshot** — AI can call `screenshot_panel` to capture the web panel in PNG (base64)
-- **Streamable HTTP** — MCP clients connect via `http://localhost:9876/mcp`
+- **发送任意 HTTP 请求** — 支持全部方法、自定义 Header/Body、代理、超时（类似 Burp Repeater）
+- **Web 面板** — 实时流量历史表格（SSE 推送）、Raw HTTP 详情视图、手动发送面板
+- **截图** — AI 可调用 `screenshot_panel` 截图 Web 面板，返回 PNG 文件 URL
+- **Streamable HTTP** — MCP 客户端通过 `http://localhost:9876/mcp` 连接
 
-## Quick Start
+## 快速开始
 
 ```bash
-# Install
+# 安装依赖
 cd mcp-http-inspector
 pip install -e .
-playwright install chromium  # or use local Chrome
 
-# Run
+# 安装 Chromium 浏览器（用于截图）
+# 项目 browsers/ 目录已内置 linux/mac-arm/win64 三平台 Chrome
+# 无需额外安装，启动时自动检测
+
+# 运行
 python server.py
 ```
 
-Open `http://localhost:9876` for the web panel.
+浏览器打开 `http://localhost:9876` 查看 Web 面板。
 
-## MCP Client Configuration
+## MCP 客户端配置
 
 ```json
 {
@@ -36,24 +39,37 @@ Open `http://localhost:9876` for the web panel.
 }
 ```
 
-## MCP Tools
+## MCP 工具
 
-| Tool | Description |
+| 工具 | 说明 |
 |---|---|
-| `send_http_request` | Send arbitrary HTTP request |
-| `list_history` | List request history with filters |
-| `get_request_detail` | Get raw HTTP request/response by ID |
-| `screenshot_panel` | Screenshot the web panel (history/detail/sender) → base64 PNG |
-| `clear_all_history` | Clear all history |
+| `send_http_request` | 发送任意 HTTP 请求，支持 `auto_screenshot` 一步获取截图 |
+| `list_history` | 列出请求历史，支持过滤和分页（不返回 raw body） |
+| `get_request_detail` | 按 ID 获取原始 HTTP 请求/响应（默认截断 5000 字符） |
+| `screenshot_panel` | 截图 Web 面板（history/detail/sender），返回 PNG 下载 URL |
+| `screenshot_last_request` | 快捷截图最新请求的 Detail，无需传 ID |
+| `clear_all_history` | 清空所有历史记录和截图文件 |
 
-## Architecture
+> 更多使用指南见 `.reasonix/skills/http-inspector/SKILL.md`
+
+## 架构
 
 ```
-MCP Client ──HTTP──▶ :9876/mcp (Streamable HTTP)
-Browser    ──HTTP──▶ :9876/    (Web Panel SPA)
+MCP 客户端 ──HTTP──▶ :9876/mcp (Streamable HTTP)
+浏览器     ──HTTP──▶ :9876/    (Web 面板 SPA)
                      :9876/api/* (REST + SSE)
                             │
-                     httpx ──▶ Target servers
-                     SQLite ◀── History store
-                     Playwright ──▶ Screenshots
+                     httpx ──▶ 目标服务器
+                     SQLite ◀── 历史存储
+                     Playwright ──▶ 截图
 ```
+
+## 支持平台
+
+自动检测 OS 选择内置 Chrome 浏览器：
+
+| 系统 | 路径 |
+|---|---|
+| Linux x64 | `browsers/chrome-linux64/chrome` |
+| macOS ARM | `browsers/chrome-mac-arm64/.../Google Chrome for Testing` |
+| Windows x64 | `browsers/chrome-win64/chrome.exe` |
