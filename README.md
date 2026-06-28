@@ -51,7 +51,7 @@ python server.py
 | `screenshot_last_request` | 快捷截图最新请求的 Detail，无需传 ID |
 | `clear_all_history` | 清空所有历史记录和截图文件 |
 
-> 更多使用指南见 `.reasonix/skills/http-inspector/SKILL.md`
+> 更多使用指南见 `skills/SKILL.md`
 
 ## 架构
 
