@@ -69,10 +69,16 @@ MCP 客户端 ──HTTP──▶ :9876/mcp (Streamable HTTP)
 
 自动检测 OS 选择内置 Chrome 浏览器：
 
-[下载地址](https://googlechromelabs.github.io/chrome-for-testing/)
+> ⚠️ **截图功能依赖 Chromium 浏览器**，需自行下载并解压到 `browsers/` 目录。
+> 
+> 下载地址：[Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/)
+> 
 
-| 系统 | 路径 |
-|---|---|
-| Linux x64 | `browsers/chrome-linux64/chrome` |
-| macOS ARM | `browsers/chrome-mac-arm64/.../Google Chrome for Testing` |
-| Windows x64 | `browsers/chrome-win64/chrome.exe` |
+| 系统 | 下载后解压到的路径 |
+|------|-------------------|
+| 🐧 Linux x64 | 下载 `chrome-linux64.zip` → 解压到 `browsers/chrome-linux64/chrome` |
+| 🍎 macOS ARM | 下载 `chrome-mac-arm64.zip` → 解压到 `browsers/chrome-mac-arm64/` |
+| 🪟 Windows x64 | 下载 `chrome-win64.zip` → 解压到 `browsers/chrome-win64/chrome.exe` |
+
+> 
+> 启动时自动检测操作系统，选择对应路径的 Chrome。**不使用截图功能则无需下载。**
