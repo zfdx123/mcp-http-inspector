@@ -69,6 +69,8 @@ MCP 客户端 ──HTTP──▶ :9876/mcp (Streamable HTTP)
 
 自动检测 OS 选择内置 Chrome 浏览器：
 
+[下载地址](https://googlechromelabs.github.io/chrome-for-testing/)
+
 | 系统 | 路径 |
 |---|---|
 | Linux x64 | `browsers/chrome-linux64/chrome` |
