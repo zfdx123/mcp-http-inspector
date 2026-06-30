@@ -66,6 +66,7 @@ async def send_http_request(
     proxy: Optional[str] = None,
     timeout: float = 30.0,
     follow_redirects: bool = True,
+    verify_ssl: bool = True,
     auto_screenshot: bool = False,
 ) -> str:
     """发送任意 HTTP 请求（类似 Burp Repeater）。
@@ -78,6 +79,7 @@ async def send_http_request(
         proxy: 代理地址，如 http://127.0.0.1:8080
         timeout: 超时秒数，默认 30
         follow_redirects: 是否跟随重定向，默认 true
+        verify_ssl: 是否验证 SSL 证书，默认 true。自签名证书时设为 false
         auto_screenshot: 设为 true 自动截图并返回 URL。必须下载到本地文件后引用，不可直接贴 URL 到 Markdown
     """
     parsed_headers = headers or {}
@@ -97,7 +99,7 @@ async def send_http_request(
     else:
         raw_request += "\r\n"
 
-    client_kwargs = {"timeout": timeout, "follow_redirects": follow_redirects}
+    client_kwargs = {"timeout": timeout, "follow_redirects": follow_redirects, "verify": verify_ssl}
     if proxy:
         client_kwargs["proxy"] = proxy
 
