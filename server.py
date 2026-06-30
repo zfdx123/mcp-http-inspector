@@ -68,6 +68,7 @@ async def send_http_request(
     follow_redirects: bool = True,
     verify_ssl: bool = True,
     auto_screenshot: bool = False,
+    max_body_length: int = 2000,
 ) -> str:
     """发送任意 HTTP 请求（类似 Burp Repeater）。
 
@@ -81,6 +82,7 @@ async def send_http_request(
         follow_redirects: 是否跟随重定向，默认 true
         verify_ssl: 是否验证 SSL 证书，默认 true。自签名证书时设为 false
         auto_screenshot: 设为 true 自动截图并返回 URL。必须下载到本地文件后引用，不可直接贴 URL 到 Markdown
+        max_body_length: 返回 body 的最大字符数，默认 2000。设为 0 不截断
     """
     parsed_headers = headers or {}
     # Normalize body: dict → JSON string
@@ -132,8 +134,12 @@ async def send_http_request(
         result = {
             "id": req_id, "status_code": resp.status_code,
             "duration_ms": round(elapsed, 2), "response_size": len(resp.content),
-            "headers": dict(resp.headers), "body_preview": resp_body[:2000],
+            "headers": dict(resp.headers),
+            "body_preview": resp_body[:max_body_length] if max_body_length > 0 else resp_body,
         }
+        if max_body_length > 0 and len(resp_body) > max_body_length:
+            result["body_truncated"] = True
+            result["body_total_length"] = len(resp_body)
         if auto_screenshot:
             sc = await _do_screenshot(view="detail", request_id=req_id)
             result["screenshot_url"] = sc["url"]

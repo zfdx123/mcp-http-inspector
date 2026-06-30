@@ -25,7 +25,7 @@ The tool returns a **screenshot URL** (e.g., `http://localhost:9876/screenshots/
 
 | Tool | Purpose | Key Params |
 |---|---|---|
-| `send_http_request` | Send any HTTP request (like Burp Repeater) | `method`, `url`, `headers` (dict), `body`, `proxy`, `timeout`, `follow_redirects`, `auto_screenshot` |
+| `send_http_request` | Send any HTTP request (like Burp Repeater) | `method`, `url`, `headers` (dict), `body`, `proxy`, `timeout`, `follow_redirects`, `verify_ssl`, `auto_screenshot`, `max_body_length` |
 | `list_history` | List past requests (summary only, no raw body) | `method_filter`, `url_filter`, `status_filter`, `limit`, `offset` |
 | `get_request_detail` | Get request detail (body truncated to 5K by default) | `request_id`, `max_body_length` |
 | `screenshot_panel` | Screenshot any panel view → PNG URL | `view`, `request_id`, `width`, `height` |
@@ -76,7 +76,9 @@ The tool returns a **screenshot URL** (e.g., `http://localhost:9876/screenshots/
 
 ## Notes
 
-- `headers` is a **dict**: `{"Content-Type": "application/json"}` — not a JSON string
+- `body` accepts **dict** or **string**: `{"user": "admin"}` or `"plain text"`
+- `verify_ssl: false` for self-signed certificates
+- `max_body_length` controls response body truncation (default 2000, 0 = full)
 - Screenshot URL is local to the MCP server; download the file, don't link it
 - Detail view uses full_page (1400x900) — captures entire raw HTTP
 - The web panel runs on `http://localhost:9876` for live viewing
