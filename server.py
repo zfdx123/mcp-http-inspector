@@ -493,6 +493,11 @@ async def _do_screenshot(
             else:
                 screenshot_bytes = await page.screenshot(type="png", full_page=False)
 
+            # Report the real PNG dimensions (viewport params can differ from
+            # the clipped full-page output), not the viewport we asked for.
+            import struct
+            actual_width, actual_height = struct.unpack(">II", screenshot_bytes[16:24])
+
             SCREENSHOTS_DIR.mkdir(exist_ok=True)
             tag = f"req{request_id}" if request_id else view
             filename = f"{tag}.png"
@@ -501,8 +506,8 @@ async def _do_screenshot(
             url = f"{PANEL_BASE_URL}/screenshots/{filename}"
             return {
                 "url": url,
-                "width": viewport_width,
-                "height": viewport_height,
+                "width": actual_width,
+                "height": actual_height,
                 "view": view,
                 "request_id": request_id,
                 "full_page": full_page,
