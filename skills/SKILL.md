@@ -7,6 +7,12 @@ description: 如何使用 http-inspector MCP 工具发送 HTTP 请求并对 Deta
 
 You have access to the `http-inspector` MCP server. It provides **6 tools** for sending arbitrary HTTP requests and capturing screenshots of the results.
 
+The server supports two transports with identical tools:
+- **Streamable HTTP** — connect to `http://localhost:9876/mcp`
+- **stdio** — launched via `mcp-http-inspector --transport stdio`; the web panel is auto-started in the background, so screenshots work exactly the same
+
+The web panel port is configurable (`--port`, default 9876); **always use the URL returned by the tools** — it already points at the port actually in use.
+
 ## Key Principle: MUST Download, Never Hotlink
 
 The tool returns a **screenshot URL** (e.g., `http://localhost:9876/screenshots/req_1.png`). **This URL only works on the MCP server's machine.** You are REQUIRED to:
@@ -81,5 +87,5 @@ The tool returns a **screenshot URL** (e.g., `http://localhost:9876/screenshots/
 - `max_body_length` controls response body truncation (default 2000, 0 = full)
 - Screenshot URL is local to the MCP server; download the file, don't link it
 - Detail view uses full_page (1400x900) — captures entire raw HTTP
-- The web panel runs on `http://localhost:9876` for live viewing
+- The web panel runs on `http://localhost:9876` for live viewing (port configurable via `--port`; check the tool-returned screenshot URL for the actual port)
 - `clear_all_history` wipes DB records and deletes all screenshot files

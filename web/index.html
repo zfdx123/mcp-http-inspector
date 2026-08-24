@@ -36,9 +36,17 @@
 
   /* Detail pane */
   .detail-container { display: flex; flex-direction: column; gap: 10px; padding: 12px; flex: 1; overflow: auto; }
-  .http-block { background: #16213e; border: 1px solid #0f3460; border-radius: 6px; overflow: hidden; }
+
+  /* Screenshot mode: let the page height follow content so full-page
+     screenshots capture everything without large blank areas below. */
+  body.screenshot-mode { height: auto; }
+  body.screenshot-mode main { overflow: visible; }
+  body.screenshot-mode .tab-content { overflow: visible; }
+  body.screenshot-mode .detail-container,
+  body.screenshot-mode .sender-container { overflow: visible; flex: none; }
+  .http-block { background: #16213e; border: 1px solid #0f3460; border-radius: 6px; overflow: hidden; flex-shrink: 0; }
   .http-block h3 { background: #0f3460; padding: 6px 12px; font-size: 13px; color: #e94560; }
-  .http-block pre { padding: 12px; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow: auto; }
+  .http-block pre { padding: 12px; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
   .meta-row { display: flex; gap: 16px; padding: 4px 12px; font-size: 12px; color: #888; }
   .back-btn { align-self: flex-start; background: #0f3460; border: 1px solid #e94560; color: #fff; padding: 4px 12px; cursor: pointer; border-radius: 4px; margin: 8px; }
 
@@ -52,7 +60,7 @@
   #send-body { min-height: 120px; }
   #send-btn { background: #e94560; color: #fff; border: none; padding: 8px 24px; cursor: pointer; border-radius: 4px; font-size: 14px; align-self: flex-start; }
   #send-btn:hover { background: #ff6b81; }
-  .response-preview { background: #16213e; border: 1px solid #0f3460; border-radius: 6px; padding: 12px; margin-top: 8px; overflow: auto; max-height: 400px; }
+  .response-preview { background: #16213e; border: 1px solid #0f3460; border-radius: 6px; padding: 12px; margin-top: 8px; overflow: auto; flex-shrink: 0; }
   .response-preview pre { font-family: 'Consolas', monospace; font-size: 12px; white-space: pre-wrap; }
 
   .empty-state { display: flex; align-items: center; justify-content: center; flex: 1; color: #555; font-size: 18px; }
@@ -147,6 +155,7 @@ const initId = urlParams.get('id');
 if (initId) { currentDetailId = parseInt(initId); if (initTab === 'detail') loadDetail(currentDetailId); }
 const screenshotMode = urlParams.get('screenshot') === '1';
 if (screenshotMode) {
+  document.body.classList.add('screenshot-mode');
   document.querySelector('header').style.display = 'none';
   document.querySelectorAll('.back-btn').forEach(b => b.style.display = 'none');
   document.querySelector('main').style.padding = '0';

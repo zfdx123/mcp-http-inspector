@@ -9,7 +9,7 @@
 - **发送任意 HTTP 请求** — 支持全部方法、自定义 Header/Body、代理、超时（类似 Burp Repeater）
 - **Web 面板** — 实时流量历史表格（SSE 推送）、Raw HTTP 详情视图、手动发送面板
 - **截图** — AI 可调用 `screenshot_panel` 截图 Web 面板，返回 PNG 文件 URL
-- **Streamable HTTP** — MCP 客户端通过 `http://localhost:9876/mcp` 连接
+- **双传输模式** — 默认 Streamable HTTP（`http://localhost:9876/mcp`），也支持 stdio（`--transport stdio`，自动拉起 Web 面板）
 
 ## 快速开始
 
@@ -24,11 +24,16 @@ pip install -e .
 
 # 运行
 python server.py
+# 或指定模式（默认 http）：
+python server.py --transport stdio --port 9876
+# 可用参数：--transport http|stdio, --host, --port
 ```
 
 浏览器打开 `http://localhost:9876` 查看 Web 面板。
 
 ## MCP 客户端配置
+
+### Streamable HTTP 模式（默认）
 
 ```json
 {
@@ -39,6 +44,21 @@ python server.py
   }
 }
 ```
+
+### stdio 模式
+
+```json
+{
+  "mcpServers": {
+    "http-inspector": {
+      "command": "mcp-http-inspector",
+      "args": ["--transport", "stdio"]
+    }
+  }
+}
+```
+
+> stdio 模式会在后台自动启动 Web 面板（默认端口 9876），Web UI 与截图功能照常可用；如需与 HTTP 实例共存，用 `--port` 指定不同端口。
 
 ## MCP 工具
 
@@ -57,6 +77,7 @@ python server.py
 
 ```
 MCP 客户端 ──HTTP──▶ :9876/mcp (Streamable HTTP)
+MCP 客户端 ──stdio─▶ stdin/stdout (--transport stdio)
 浏览器     ──HTTP──▶ :9876/    (Web 面板 SPA)
                      :9876/api/* (REST + SSE)
                             │

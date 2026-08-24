@@ -27,3 +27,7 @@ Thumbs.db
 
 # Misc
 *.log
+
+# Agent
+.reasonix
+.codex
