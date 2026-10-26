@@ -584,7 +584,10 @@ def _run_stdio(args: argparse.Namespace) -> None:
     _wait_for_port(args.host, args.port)
 
     # Fresh MCPServer instance — never shares session state with the HTTP app.
-    create_mcp().run(transport="stdio")
+    try:
+        create_mcp().run(transport="stdio")
+    except KeyboardInterrupt:
+        pass
 
 
 # ── Main ───────────────────────────────────────────────────
